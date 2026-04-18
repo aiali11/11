@@ -3,72 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوابة رفع الملفات - أستاذ علي</title>
+    <title>بوابة الأنشطة - أستاذ علي الشعلة</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .upload-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 400px; }
-        h2 { color: #333; }
-        input[type="file"] { margin: 20px 0; display: block; width: 100%; }
-        button { background-color: #4CAF50; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; }
-        button:hover { background-color: #45a049; }
-        #status { margin-top: 20px; font-weight: bold; color: #555; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f2f5; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 500px; margin-bottom: 20px; }
+        h2 { color: #1a73e8; margin-top: 0; }
+        input[type="file"] { margin: 15px 0; width: 100%; }
+        button { background-color: #34a853; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
+        button:hover { background-color: #2d8e47; }
+        .file-list { width: 100%; max-width: 500px; text-align: right; }
+        .file-item { background: white; padding: 12px; margin: 8px 0; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-right: 5px solid #1a73e8; }
+        .file-info { display: flex; flex-direction: column; }
+        .file-name { font-weight: bold; color: #333; }
+        .file-time { font-size: 12px; color: #777; }
+        .btn-open { color: #1a73e8; text-decoration: none; font-weight: bold; padding: 5px 10px; border: 1px solid #1a73e8; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-<div class="upload-container">
+<div class="card">
     <h2>بوابة رفع الملفات 📁</h2>
-    <p>اختر ملف (وورد، بوربوينت، أو صورة) للرفع</p>
+    <p>مدرسة عثمان بن عفان - ر جال ألمع</p>
     <input type="file" id="fileInput">
     <button onclick="uploadFile()">رفع الملف الآن</button>
-    <div id="status"></div>
+    <p id="status" style="margin-top:10px; font-weight:bold;"></p>
+</div>
+
+<div class="file-list">
+    <h3 style="color: #555;">ملفات تم رفعها اليوم:</h3>
+    <div id="fileDisplay">جاري تحديث القائمة...</div>
 </div>
 
 <script>
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbyE72PPOVhPIrdsvgNEuAZzwxwfGO7SajqPl4WRrwJclKDTiMYplRl8wOLJAqfE3SyL/exec";
+
     async function uploadFile() {
         const fileInput = document.getElementById('fileInput');
         const status = document.getElementById('status');
         const file = fileInput.files[0];
+        if (!file) return alert("فضلاً اختر ملفاً أولاً!");
 
-        if (!file) {
-            alert("فضلاً اختر ملف أولاً!");
-            return;
-        }
-
-        status.innerHTML = "جاري الرفع إلى قوقل درايف... انتظر ثواني ⏳";
-        
+        status.innerHTML = "جاري الرفع... ⏳";
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = async function () {
-            const base64 = reader.result.split(',')[1];
-            const data = {
-                base64: base64,
-                type: file.type,
-                name: file.name
-            };
-
-            // ضع الرابط الذي نسخته من جوجل سكريبت هنا بين علامتي التنصيص
-            const webAppUrl = "https://script.google.com/macros/s/AKfycbyCaRmEsBbC88BvIvG0bjYSvg6eAPdWUJ3LauPYngg_2rEeLJh_2OmNXNogRMQRQE0lnQ/exec";
-
+            const data = { base64: reader.result.split(',')[1], type: file.type, name: file.name };
             try {
-                const response = await fetch(webAppUrl, {
-                    method: 'POST',
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-                if (result.result === "success") {
-                    status.innerHTML = "✅ تم الرفع بنجاح! الملف الآن في مجلدك.";
-                    fileInput.value = ""; 
-                } else {
-                    status.innerHTML = "❌ حدث خطأ: " + result.error;
-                }
-            } catch (error) {
-                status.innerHTML = "❌ فشل الاتصال. تأكد من إعدادات النشر.";
-                console.error(error);
-            }
+                await fetch(webAppUrl, { method: 'POST', body: JSON.stringify(data) });
+                status.innerHTML = "✅ تم الرفع بنجاح!";
+                loadFiles(); 
+            } catch (e) { status.innerHTML = "❌ خطأ في الرفع"; }
         };
     }
+
+    async function loadFiles() {
+        const display = document.getElementById('fileDisplay');
+        try {
+            const response = await fetch(webAppUrl);
+            const files = await response.json();
+            if (files.length === 0) {
+                display.innerHTML = "<p style='color:#888;'>لا توجد ملفات مرفوعة اليوم بعد.</p>";
+                return;
+            }
+            display.innerHTML = files.map(f => `
+                <div class="file-item">
+                    <div class="file-info">
+                        <span class="file-name">${f.name}</span>
+                        <span class="file-time">الساعة: ${f.time}</span>
+                    </div>
+                    <a href="${f.url}" target="_blank" class="btn-open">فتح الملف</a>
+                </div>
+            `).join('');
+        } catch (e) { display.innerHTML = "خطأ في تحميل القائمة."; }
+    }
+
+    window.onload = loadFiles;
 </script>
 
 </body>
