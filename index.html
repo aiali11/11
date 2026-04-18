@@ -3,80 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوابة الأنشطة - أستاذ علي الشعلة</title>
+    <title>بوابة الأنشطة المتقدمة - مدرسة عثمان بن عفان</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f2f5; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 500px; margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; padding: 20px; display: flex; flex-direction: column; align-items: center; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); width: 100%; max-width: 550px; margin-bottom: 25px; text-align: center; }
         h2 { color: #1a73e8; margin-top: 0; }
-        input[type="file"] { margin: 15px 0; width: 100%; }
-        button { background-color: #34a853; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
+        .school-info { font-size: 14px; color: #666; margin-bottom: 20px; }
+        input[type="file"] { margin: 15px 0; display: block; width: 100%; padding: 10px; border: 2px dashed #ddd; border-radius: 10px; cursor: pointer; }
+        button { background-color: #34a853; color: white; border: none; padding: 14px; border-radius: 10px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
         button:hover { background-color: #2d8e47; }
-        .file-list { width: 100%; max-width: 500px; text-align: right; }
-        .file-item { background: white; padding: 12px; margin: 8px 0; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-right: 5px solid #1a73e8; }
+        #status { margin-top: 15px; font-weight: bold; color: #444; }
+        .file-list { width: 100%; max-width: 550px; text-align: right; }
+        .file-item { background: white; padding: 18px; margin: 12px 0; border-radius: 15px; display: flex; flex-direction: column; border-right: 6px solid #1a73e8; box-shadow: 0 3px 8px rgba(0,0,0,0.04); }
+        .preview-container { text-align: center; margin-bottom: 15px; display: none; }
+        .preview-img { width: 100%; max-height: 250px; object-fit: contain; border-radius: 10px; border: 1px solid #eee; }
+        .file-details { display: flex; justify-content: space-between; align-items: center; }
         .file-info { display: flex; flex-direction: column; }
-        .file-name { font-weight: bold; color: #333; }
-        .file-time { font-size: 12px; color: #777; }
-        .btn-open { color: #1a73e8; text-decoration: none; font-weight: bold; padding: 5px 10px; border: 1px solid #1a73e8; border-radius: 5px; }
+        .file-name { font-weight: bold; color: #333; font-size: 15px; }
+        .file-time { font-size: 12px; color: #888; margin-top: 3px; }
+        .file-actions { display: flex; gap: 10px; }
+        .btn-link { text-decoration: none; padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: bold; flex: 1; text-align: center; }
+        .view-link { background-color: #e8f0fe; color: #1a73e8; border: 1px solid #1a73e8; }
+        .download-link { background-color: #34a853; color: white; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <h2>بوابة رفع الملفات 📁</h2>
-    <p>مدرسة عثمان بن عفان - ر جال ألمع</p>
-    <input type="file" id="fileInput">
-    <button onclick="uploadFile()">رفع الملف الآن</button>
-    <p id="status" style="margin-top:10px; font-weight:bold;"></p>
+    <div class="school-info">مدرسة عثمان بن عفان - رجال ألمع<br>أستاذ علي الشعلة</div>
+    <p style="color: #666;">يمكنك تحديد عدة صور أو ملفات معاً لرفعها</p>
+    <input type="file" id="fileInput" multiple> 
+    <button onclick="uploadFiles()">رفع كافة الملفات</button>
+    <p id="status"></p>
 </div>
 
 <div class="file-list">
-    <h3 style="color: #555;">ملفات تم رفعها اليوم:</h3>
-    <div id="fileDisplay">جاري تحديث القائمة...</div>
+    <h3 style="color: #444; margin-right: 10px;">ملفات تم رفعها اليوم ومعاينتها:</h3>
+    <div id="fileDisplay">جاري تحديث القائمة...⏳</div>
 </div>
 
 <script>
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbyE72PPOVhPIrdsvgNEuAZzwxwfGO7SajqPl4WRrwJclKDTiMYplRl8wOLJAqfE3SyL/exec";
+    // ضع الرابط الجديد الخاص بك هنا (الذي ينتهي بـ exec)
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbwWFpjne8KtsIPNfd70-jG0o9Np83T49v96IiQcGHdSfg0L2F92eIT0CV1-lrkV1bKoZg/exec";
 
-    async function uploadFile() {
+    // وظيفة الرفع (تدعم الملفات المتعددة)
+    async function uploadFiles() {
         const fileInput = document.getElementById('fileInput');
         const status = document.getElementById('status');
-        const file = fileInput.files[0];
-        if (!file) return alert("فضلاً اختر ملفاً أولاً!");
+        const files = fileInput.files;
+        
+        if (files.length === 0) return alert("فضلاً اختر ملفاً واحداً على الأقل!");
 
-        status.innerHTML = "جاري الرفع... ⏳";
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = async function () {
-            const data = { base64: reader.result.split(',')[1], type: file.type, name: file.name };
-            try {
-                await fetch(webAppUrl, { method: 'POST', body: JSON.stringify(data) });
-                status.innerHTML = "✅ تم الرفع بنجاح!";
-                loadFiles(); 
-            } catch (e) { status.innerHTML = "❌ خطأ في الرفع"; }
-        };
+        status.innerHTML = `جاري رفع ${files.length} ملف... انتظر قليلًا ⏳`;
+        
+        // استخدام حلقة لرفع كل ملف على حدة
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            
+            const promise = new Promise((resolve) => {
+                reader.readAsDataURL(file);
+                reader.onload = async function () {
+                    const data = {
+                        base64: reader.result.split(',')[1],
+                        type: file.type,
+                        name: file.name
+                    };
+                    try {
+                        await fetch(webAppUrl, { method: 'POST', body: JSON.stringify(data) });
+                        resolve(); // تم الرفع بنجاح
+                    } catch (e) {
+                        console.error("خطأ في رفع ملف:", file.name);
+                        resolve(); // ننتقل للملف التالي حتى لو حدث خطأ
+                    }
+                };
+            });
+            await promise; // انتظار انتهاء رفع الملف الحالي
+        }
+        
+        status.innerHTML = "✅ اكتمل رفع جميع الملفات بنجاح!";
+        fileInput.value = ""; // تفريغ الخانة
+        loadFiles(); // تحديث القائمة
     }
 
+    // وظيفة جلب وعرض الملفات مع المعاينة وزر التنزيل
     async function loadFiles() {
         const display = document.getElementById('fileDisplay');
         try {
             const response = await fetch(webAppUrl);
             const files = await response.json();
             if (files.length === 0) {
-                display.innerHTML = "<p style='color:#888;'>لا توجد ملفات مرفوعة اليوم بعد.</p>";
+                display.innerHTML = "<p style='text-align:center; color:#888; background:white; padding:20px; border-radius:10px;'>لا توجد ملفات مرفوعة اليوم بعد.</p>";
                 return;
             }
-            display.innerHTML = files.map(f => `
+            display.innerHTML = files.map(f => {
+                // التأكد إذا كان الملف صورة (لعرض المعاينة)
+                const isImage = f.mimeType && f.mimeType.includes('image');
+                
+                // رابط المعاينة/التنزيل المباشر من قوقل درايف
+                const downloadUrl = `https://drive.google.com/uc?export=download&id=${f.id}`;
+                
+                return `
                 <div class="file-item">
-                    <div class="file-info">
-                        <span class="file-name">${f.name}</span>
-                        <span class="file-time">الساعة: ${f.time}</span>
+                    ${isImage ? `
+                    <div class="preview-container" style="display:block;">
+                        <img src="${downloadUrl}" class="preview-img" alt="${f.name}">
                     </div>
-                    <a href="${f.url}" target="_blank" class="btn-open">فتح الملف</a>
+                    ` : ''}
+                    <div class="file-details">
+                        <div class="file-info">
+                            <span class="file-name">${f.name}</span>
+                            <span class="file-time">وقت الرفع: ${f.time}</span>
+                        </div>
+                        <div class="file-actions">
+                            <a href="${f.url}" target="_blank" class="btn-link view-link">عرض</a>
+                            <a href="${downloadUrl}" target="_blank" class="btn-link download-link">تنزيل</a>
+                        </div>
+                    </div>
                 </div>
-            `).join('');
-        } catch (e) { display.innerHTML = "خطأ في تحميل القائمة."; }
+                `;
+            }).join('');
+        } catch (e) {
+            display.innerHTML = "<p style='text-align:center; color:red;'>خطأ في تحميل القائمة. تأكد من إعدادات النشر.</p>";
+            console.error(e);
+        }
     }
 
+    // تشغيل جلب الملفات تلقائياً عند فتح الصفحة
     window.onload = loadFiles;
 </script>
 
