@@ -3,29 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوابة الأنشطة</title>
+    <title>بوابة الملفات المؤمنة</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f6f9; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
+        /* شاشة القفل */
         #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a73e8; display: flex; justify-content: center; align-items: center; z-index: 1000; transition: 0.5s; }
         .pin-box { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; width: 300px; }
-        .pin-box input { width: 100%; padding: 15px; font-size: 24px; text-align: center; border: 2px solid #ddd; border-radius: 10px; margin-bottom: 20px; letter-spacing: 5px; box-sizing: border-box; }
+        .pin-box input { width: 100%; padding: 15px; font-size: 24px; text-align: center; border: 2px solid #ddd; border-radius: 10px; margin-bottom: 20px; box-sizing: border-box; }
         .pin-box button { background: #34a853; color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; }
 
+        /* المحتوى الأساسي */
         #mainContent { display: none; width: 100%; max-width: 550px; padding: 20px; box-sizing: border-box; }
-        
         .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; margin-bottom: 25px; }
         h2, h3 { color: #1a73e8; margin-top: 0; }
-        
         input[type="file"] { margin: 15px 0; width: 100%; padding: 10px; border: 2px dashed #ddd; border-radius: 10px; cursor: pointer; box-sizing: border-box; }
         textarea { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; resize: vertical; box-sizing: border-box; margin-bottom: 15px; font-family: inherit; }
-        
         .upload-btn { background-color: #34a853; color: white; border: none; padding: 14px; border-radius: 10px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
-        .text-btn { background-color: #fbbc05; color: #333; }
+        .text-btn { background-color: #fbbc05; color: #333; margin-top: 10px; }
         
-        .file-list { width: 100%; text-align: right; }
-        .file-item { background: white; padding: 18px; margin: 12px 0; border-radius: 15px; border-right: 6px solid #1a73e8; box-shadow: 0 3px 8px rgba(0,0,0,0.04); }
-        .preview-img { width: 100%; max-height: 250px; object-fit: contain; border-radius: 10px; margin-bottom: 15px; border: 1px solid #eee; }
+        .file-item { background: white; padding: 18px; margin: 12px 0; border-radius: 15px; border-right: 6px solid #1a73e8; box-shadow: 0 3px 8px rgba(0,0,0,0.04); text-align: right; }
+        .preview-img { width: 100%; max-height: 250px; object-fit: contain; border-radius: 10px; margin-bottom: 15px; }
         .file-actions { display: flex; gap: 10px; margin-top: 10px; }
         .btn-link { text-decoration: none; padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: bold; flex: 1; text-align: center; }
         .view-link { background-color: #e8f0fe; color: #1a73e8; }
@@ -37,158 +35,119 @@
 <div id="lockScreen">
     <div class="pin-box">
         <h2>🔒 البوابة المؤمنة</h2>
-        <input type="password" id="pinInput" placeholder="****">
+        <input type="password" id="pinInput" placeholder="أدخل الرمز">
         <button id="loginBtn" onclick="checkPin()">دخول</button>
-        <p id="errorMsg" style="color:red; margin-top:10px; display:none;">الرمز غير صحيح أو خطأ بالاتصال!</p>
+        <p id="errorMsg" style="color:red; margin-top:10px; display:none;">الرمز غير صحيح!</p>
     </div>
 </div>
 
 <div id="mainContent">
     <div class="card">
-        <h2>بوابة رفع الملفات 📁</h2>
+        <h2>رفع الملفات 📁</h2>
         <input type="file" id="fileInput" multiple> 
-        <button class="upload-btn" onclick="uploadFiles()">رفع كافة الملفات</button>
+        <button class="upload-btn" onclick="uploadFiles()">رفع الآن</button>
         <p id="status" style="margin-top:10px; font-weight:bold;"></p>
     </div>
 
     <div class="card">
-        <h3>📝 مسودة النصوص السريعة</h3>
-        <p style="color: #666; font-size: 14px;">انسخ أي نص (من الواتساب مثلاً) وسيتحول لملف جاهز للطباعة</p>
-        <textarea id="textSnippet" rows="4" placeholder="الصق نصك هنا..."></textarea>
-        <button class="upload-btn text-btn" onclick="uploadText()">حفظ كملف نصي (.txt)</button>
-        <p id="textStatus" style="margin-top:10px; font-weight:bold;"></p>
+        <h3>📝 مسودة النصوص</h3>
+        <textarea id="textSnippet" rows="3" placeholder="الصق النص هنا..."></textarea>
+        <button class="upload-btn text-btn" onclick="uploadText()">حفظ كملاحظة</button>
     </div>
 
-    <div class="file-list">
-        <h3 style="color: #444;">ملفات ونصوص اليوم:</h3>
-        <div id="fileDisplay"></div>
-    </div>
+    <div id="fileDisplay"></div>
 </div>
 
 <script>
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbxeE0FL9mnRbPk7JRF5xBzKDk9Byip0WV0eQf0Ixqa7NxdqOMahAkhA_1Sv02u60dbIWg/exec"; // انسخ الرابط الجديد من قوقل هنا
-    let userPin = ""; // سيتم حفظ الرمز مؤقتاً في ذاكرة المتصفح
+    const webAppUrl = "ضع_رابط_تطبيق_الويب_هنا"; // ضع رابط الـ exec الخاص بك هنا
+    let sessionPin = ""; 
 
-    // وظيفة التحقق من الرمز عن طريق قوقل (حماية 100%)
     async function checkPin() {
-        const inputVal = document.getElementById('pinInput').value;
+        const pin = document.getElementById('pinInput').value;
         const btn = document.getElementById('loginBtn');
-        const errorMsg = document.getElementById('errorMsg');
+        btn.innerHTML = "جاري التحقق...";
         
-        btn.innerHTML = "جاري التحقق... ⏳";
-        btn.disabled = true;
-
         try {
             const response = await fetch(webAppUrl, {
                 method: 'POST',
-                body: JSON.stringify({ pin: inputVal, action: 'loadFiles' })
+                body: JSON.stringify({ pin: pin, action: 'loadFiles' })
             });
             const result = await response.json();
 
             if (result.result === "success") {
-                userPin = inputVal; // حفظ الرمز لاستخدامه في الرفع
-                document.getElementById('lockScreen').style.opacity = "0";
-                setTimeout(() => {
-                    document.getElementById('lockScreen').style.display = "none";
-                    document.getElementById('mainContent').style.display = "block";
-                    renderFiles(result.files); // عرض الملفات مباشرة
-                }, 500);
+                sessionPin = pin;
+                document.getElementById('lockScreen').style.display = "none";
+                document.getElementById('mainContent').style.display = "block";
+                renderFiles(result.files);
             } else {
-                errorMsg.style.display = "block";
-                errorMsg.innerText = result.error;
+                document.getElementById('errorMsg').style.display = "block";
             }
-        } catch (e) {
-            errorMsg.style.display = "block";
-        }
+        } catch (e) { alert("خطأ في الاتصال بالسحابة"); }
         btn.innerHTML = "دخول";
-        btn.disabled = false;
-        document.getElementById('pinInput').value = "";
     }
 
-    // رفع النصوص (ميزة 1)
-    async function uploadText() {
-        const textInput = document.getElementById('textSnippet');
-        const status = document.getElementById('textStatus');
-        
-        if (!textInput.value.trim()) return alert("فضلاً اكتب أو الصق نصاً أولاً!");
-
-        status.innerHTML = `جاري حفظ النص... ⏳`;
-        try {
-            await fetch(webAppUrl, { 
-                method: 'POST', 
-                body: JSON.stringify({ pin: userPin, action: 'uploadText', text: textInput.value }) 
-            });
-            status.innerHTML = "✅ تم حفظ النص كملف بنجاح!";
-            textInput.value = "";
-            refreshFiles();
-        } catch (e) { status.innerHTML = "❌ خطأ في الحفظ"; }
-    }
-
-    // رفع الملفات
     async function uploadFiles() {
         const fileInput = document.getElementById('fileInput');
         const status = document.getElementById('status');
         const files = fileInput.files;
-        if (files.length === 0) return alert("اختر ملفات!");
+        if (files.length === 0) return;
 
-        status.innerHTML = `جاري رفع ${files.length} ملف... ⏳`;
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
+        status.innerHTML = "جاري الرفع... ⏳";
+        for (let file of files) {
             const reader = new FileReader();
-            await new Promise((resolve) => {
+            await new Promise(r => {
                 reader.readAsDataURL(file);
-                reader.onload = async function () {
-                    const data = { pin: userPin, action: 'uploadFile', base64: reader.result.split(',')[1], type: file.type, name: file.name };
-                    try { await fetch(webAppUrl, { method: 'POST', body: JSON.stringify(data) }); } catch (e) {}
-                    resolve();
+                reader.onload = async () => {
+                    await fetch(webAppUrl, { 
+                        method: 'POST', 
+                        body: JSON.stringify({ pin: sessionPin, action: 'uploadFile', base64: reader.result.split(',')[1], type: file.type, name: file.name }) 
+                    });
+                    r();
                 };
             });
         }
-        status.innerHTML = "✅ اكتمل الرفع!";
+        status.innerHTML = "✅ تم الرفع!";
         fileInput.value = "";
-        refreshFiles();
+        refresh();
     }
 
-    // تحديث قائمة الملفات
-    async function refreshFiles() {
-        document.getElementById('fileDisplay').innerHTML = "جاري التحديث...⏳";
-        try {
-            const response = await fetch(webAppUrl, {
-                method: 'POST',
-                body: JSON.stringify({ pin: userPin, action: 'loadFiles' })
-            });
-            const result = await response.json();
-            if (result.result === "success") renderFiles(result.files);
-        } catch (e) {}
+    async function uploadText() {
+        const text = document.getElementById('textSnippet').value;
+        if (!text.trim()) return;
+        await fetch(webAppUrl, { 
+            method: 'POST', 
+            body: JSON.stringify({ pin: sessionPin, action: 'uploadText', text: text }) 
+        });
+        document.getElementById('textSnippet').value = "";
+        refresh();
     }
 
-    // رسم كروت الملفات في الصفحة
+    async function refresh() {
+        const response = await fetch(webAppUrl, {
+            method: 'POST',
+            body: JSON.stringify({ pin: sessionPin, action: 'loadFiles' })
+        });
+        const result = await response.json();
+        renderFiles(result.files);
+    }
+
     function renderFiles(files) {
         const display = document.getElementById('fileDisplay');
-        if (!files || files.length === 0) { display.innerHTML = "لا توجد ملفات اليوم."; return; }
-        
         display.innerHTML = files.map(f => {
-            const isImage = f.mimeType && f.mimeType.includes('image');
-            const isText = f.name.includes('.txt');
-            const thumbnailUrl = `https://drive.google.com/thumbnail?id=${f.id}&sz=w600`;
-            const downloadUrl = `https://drive.google.com/uc?export=download&id=${f.id}`;
-            
-            // وضع أيقونة تعبيرية بجانب اسم الملف حسب نوعه
-            let icon = isImage ? '🖼️' : (isText ? '📝' : '📄');
-
+            const isImg = f.mimeType.includes('image');
+            const thumb = `https://drive.google.com/thumbnail?id=${f.id}&sz=w600`;
             return `
             <div class="file-item">
-                ${isImage ? `<img src="${thumbnailUrl}" class="preview-img">` : ''}
-                <div style="font-weight:bold;">${icon} ${f.name}</div>
+                ${isImg ? `<img src="${thumb}" class="preview-img">` : ''}
+                <div style="font-weight:bold;">${f.name}</div>
                 <div style="font-size:12px; color:#888;">${f.time}</div>
                 <div class="file-actions">
                     <a href="${f.url}" target="_blank" class="btn-link view-link">عرض</a>
-                    <a href="${downloadUrl}" target="_blank" class="btn-link download-link">تنزيل</a>
+                    <a href="https://drive.google.com/uc?export=download&id=${f.id}" class="btn-link download-link">تنزيل</a>
                 </div>
             </div>`;
         }).join('');
     }
 </script>
-
 </body>
 </html>
