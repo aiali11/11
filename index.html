@@ -3,25 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوابة الأنشطة الخاصة - أستاذ علي</title>
+    <title>بوابة الأنشطة</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f6f9; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        /* تصميم شاشة القفل */
         #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a73e8; display: flex; justify-content: center; align-items: center; z-index: 1000; transition: 0.5s; }
         .pin-box { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; width: 300px; }
         .pin-box h2 { margin-bottom: 20px; color: #333; }
         .pin-box input { width: 100%; padding: 15px; font-size: 24px; text-align: center; border: 2px solid #ddd; border-radius: 10px; margin-bottom: 20px; letter-spacing: 5px; }
         .pin-box button { background: #34a853; color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; }
 
-        /* محتوى الموقع (مخفي في البداية) */
         #mainContent { display: none; width: 100%; max-width: 550px; padding: 20px; }
         
         .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; margin-bottom: 25px; }
+        h2 { color: #1a73e8; margin-top: 0; }
         input[type="file"] { margin: 15px 0; width: 100%; padding: 10px; border: 2px dashed #ddd; border-radius: 10px; cursor: pointer; }
         .upload-btn { background-color: #34a853; color: white; border: none; padding: 14px; border-radius: 10px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
+        
+        .file-list { width: 100%; text-align: right; }
         .file-item { background: white; padding: 18px; margin: 12px 0; border-radius: 15px; border-right: 6px solid #1a73e8; box-shadow: 0 3px 8px rgba(0,0,0,0.04); }
-        .preview-img { width: 100%; max-height: 250px; object-fit: contain; border-radius: 10px; margin-bottom: 15px; }
+        .preview-img { width: 100%; max-height: 250px; object-fit: contain; border-radius: 10px; margin-bottom: 15px; border: 1px solid #eee; }
         .file-actions { display: flex; gap: 10px; margin-top: 10px; }
         .btn-link { text-decoration: none; padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: bold; flex: 1; text-align: center; }
         .view-link { background-color: #e8f0fe; color: #1a73e8; }
@@ -33,7 +34,6 @@
 <div id="lockScreen">
     <div class="pin-box">
         <h2>🔒 مغلق</h2>
-        <p>أدخل رمز PIN للدخول</p>
         <input type="password" id="pinInput" placeholder="****" maxlength="4">
         <button onclick="checkPin()">دخول</button>
         <p id="errorMsg" style="color:red; margin-top:10px; display:none;">الرمز غير صحيح!</p>
@@ -43,44 +43,35 @@
 <div id="mainContent">
     <div class="card">
         <h2>بوابة رفع الملفات 📁</h2>
-        <p style="color: #666;">مرحباً بك أستاذ علي</p>
         <input type="file" id="fileInput" multiple> 
         <button class="upload-btn" onclick="uploadFiles()">رفع كافة الملفات</button>
-        <p id="status"></p>
+        <p id="status" style="margin-top:10px; font-weight:bold;"></p>
     </div>
 
-    <div id="fileListArea">
-        <h3 style="color: #444;">ملفات اليوم والمعاينة:</h3>
+    <div class="file-list">
+        <h3 style="color: #444;">الملفات المرفوعة:</h3>
         <div id="fileDisplay">جاري التحميل...⏳</div>
     </div>
 </div>
 
 <script>
-    // الإعدادات المهمة
-    const CORRECT_PIN = "1234"; // <<< غير الرمز من هنا لأي 4 أرقام تبيها
+    const CORRECT_PIN = "1234"; // رمزك السري
     const webAppUrl = "https://script.google.com/macros/s/AKfycbwWFpjne8KtsIPNfd70-jG0o9Np83T49v96IiQcGHdSfg0L2F92eIT0CV1-lrkV1bKoZg/exec";
 
-    // وظيفة التحقق من الرمز
     function checkPin() {
-        const input = document.getElementById('pinInput').value;
-        const lockScreen = document.getElementById('lockScreen');
-        const mainContent = document.getElementById('mainContent');
-        const errorMsg = document.getElementById('errorMsg');
-
-        if (input === CORRECT_PIN) {
-            lockScreen.style.opacity = "0";
+        if (document.getElementById('pinInput').value === CORRECT_PIN) {
+            document.getElementById('lockScreen').style.opacity = "0";
             setTimeout(() => {
-                lockScreen.style.display = "none";
-                mainContent.style.display = "block";
-                loadFiles(); // تحميل الملفات بعد الدخول
+                document.getElementById('lockScreen').style.display = "none";
+                document.getElementById('mainContent').style.display = "block";
+                loadFiles(); 
             }, 500);
         } else {
-            errorMsg.style.display = "block";
+            document.getElementById('errorMsg').style.display = "block";
             document.getElementById('pinInput').value = "";
         }
     }
 
-    // وظيفة الرفع
     async function uploadFiles() {
         const fileInput = document.getElementById('fileInput');
         const status = document.getElementById('status');
@@ -105,7 +96,6 @@
         loadFiles();
     }
 
-    // وظيفة عرض الملفات
     async function loadFiles() {
         const display = document.getElementById('fileDisplay');
         try {
@@ -114,10 +104,13 @@
             if (files.length === 0) { display.innerHTML = "لا توجد ملفات اليوم."; return; }
             display.innerHTML = files.map(f => {
                 const isImage = f.mimeType && f.mimeType.includes('image');
+                // رابط المعاينة الجذري من جوجل
+                const thumbnailUrl = `https://drive.google.com/thumbnail?id=${f.id}&sz=w600`;
                 const downloadUrl = `https://drive.google.com/uc?export=download&id=${f.id}`;
+                
                 return `
                 <div class="file-item">
-                    ${isImage ? `<img src="${downloadUrl}" class="preview-img">` : ''}
+                    ${isImage ? `<img src="${thumbnailUrl}" class="preview-img">` : ''}
                     <div style="font-weight:bold;">${f.name}</div>
                     <div style="font-size:12px; color:#888;">${f.time}</div>
                     <div class="file-actions">
