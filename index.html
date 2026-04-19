@@ -3,149 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوابة الملفات المؤمنة</title>
+    <title>البوابة الخاصة</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f6f9; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f6f9; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a73e8; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; margin-bottom: 20px; text-align: center; }
+        .upload-btn { background: #34a853; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
+        .delete-btn { background: #ea4335; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+        .file-item { background: white; padding: 15px; margin: 10px 0; border-radius: 10px; border-right: 5px solid #1a73e8; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: right;}
+        textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; resize: none; box-sizing: border-box; }
+        select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; margin-bottom: 15px; }
         
-        /* شاشة القفل */
-        #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a73e8; display: flex; justify-content: center; align-items: center; z-index: 1000; transition: 0.5s; }
-        .pin-box { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; width: 300px; }
-        .pin-box input { width: 100%; padding: 15px; font-size: 24px; text-align: center; border: 2px solid #ddd; border-radius: 10px; margin-bottom: 20px; box-sizing: border-box; }
-        .pin-box button { background: #34a853; color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; }
-
-        /* المحتوى الأساسي */
-        #mainContent { display: none; width: 100%; max-width: 550px; padding: 20px; box-sizing: border-box; }
-        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); text-align: center; margin-bottom: 25px; }
-        h2, h3 { color: #1a73e8; margin-top: 0; }
-        input[type="file"] { margin: 15px 0; width: 100%; padding: 10px; border: 2px dashed #ddd; border-radius: 10px; cursor: pointer; box-sizing: border-box; }
-        textarea { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; resize: vertical; box-sizing: border-box; margin-bottom: 15px; font-family: inherit; }
-        .upload-btn { background-color: #34a853; color: white; border: none; padding: 14px; border-radius: 10px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
-        .text-btn { background-color: #fbbc05; color: #333; margin-top: 10px; }
-        
-        .file-item { background: white; padding: 18px; margin: 12px 0; border-radius: 15px; border-right: 6px solid #1a73e8; box-shadow: 0 3px 8px rgba(0,0,0,0.04); text-align: right; }
-        .preview-img { width: 100%; max-height: 250px; object-fit: contain; border-radius: 10px; margin-bottom: 15px; }
-        .file-actions { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-link { text-decoration: none; padding: 8px 15px; border-radius: 6px; font-size: 13px; font-weight: bold; flex: 1; text-align: center; }
-        .view-link { background-color: #e8f0fe; color: #1a73e8; }
-        .download-link { background-color: #34a853; color: white; }
+        /* تصميم نافذة قراءة النصوص */
+        #textModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 500px; text-align: center; }
+        .btn-link { text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="lockScreen">
-    <div class="pin-box">
-        <h2>🔒 البوابة المؤمنة</h2>
-        <input type="password" id="pinInput" placeholder="أدخل الرمز">
-        <button id="loginBtn" onclick="checkPin()">دخول</button>
-        <p id="errorMsg" style="color:red; margin-top:10px; display:none;">الرمز غير صحيح!</p>
+    <div style="background:white; padding:30px; border-radius:15px; text-align:center;">
+        <h3>🔒 الدخول الآمن</h3>
+        <input type="password" id="pinInput" placeholder="PIN" style="padding:10px; text-align:center; width:80%;">
+        <button onclick="checkPin()" style="margin-top:15px; padding:10px 20px; cursor:pointer;">دخول</button>
     </div>
 </div>
 
-<div id="mainContent">
+<div id="textModal">
+    <div class="modal-content">
+        <h3 id="modalTitle" style="color:#1a73e8; margin-top:0;">قراءة الملاحظة</h3>
+        <textarea id="modalText" readonly rows="8" style="background:#f9f9f9;"></textarea>
+        <button onclick="closeModal()" style="background:#ea4335; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; width:100%; margin-top:10px;">إغلاق</button>
+    </div>
+</div>
+
+<div id="mainContent" style="display:none; width:100%; max-width:500px;">
+    
     <div class="card">
-        <h2>رفع الملفات 📁</h2>
-        <input type="file" id="fileInput" multiple> 
+        <h3>رفع الملفات</h3>
+        <input type="file" id="fileInput" multiple>
         <button class="upload-btn" onclick="uploadFiles()">رفع الآن</button>
-        <p id="status" style="margin-top:10px; font-weight:bold;"></p>
     </div>
 
     <div class="card">
-        <h3>📝 مسودة النصوص</h3>
-        <textarea id="textSnippet" rows="3" placeholder="الصق النص هنا..."></textarea>
-        <button class="upload-btn text-btn" onclick="uploadText()">حفظ كملاحظة</button>
+        <h3>مسودة النصوص</h3>
+        <textarea id="textSnippet" rows="3" placeholder="الصق نصك هنا..."></textarea>
+        <button class="upload-btn" style="background:#fbbc05; color:#333;" onclick="uploadText()">حفظ كملاحظة</button>
     </div>
 
-    <div id="fileDisplay"></div>
+    <div>
+        <select id="sortSelect" onchange="renderFiles()">
+            <option value="newest">فرز حسب: الأحدث أولاً</option>
+            <option value="oldest">فرز حسب: الأقدم أولاً</option>
+            <option value="largest">فرز حسب: الأكبر حجماً</option>
+            <option value="smallest">فرز حسب: الأصغر حجماً</option>
+        </select>
+        <div id="fileDisplay"></div>
+    </div>
 </div>
 
 <script>
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbxKjn_ZwDV-wDfCHdbdDDkkh2gIVcvjRy8IFMmaXRK9zXRDi_Mh6jp9xHFsD-8aR76MEw/exec"; // ضع رابط الـ exec الخاص بك هنا
-    let sessionPin = ""; 
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbzfPhVbquV2PXRq5wNquIFDNjfRwCKU7P3lS_V6XQw8lKVkwzpxt3YC-yHOQFxKWCGMkw/exec"; // <<< رابطك هنا
+    let sessionPin = "";
+    let currentFiles = []; // مصفوفة لتخزين الملفات للفلترة
+
+    // دالة تحويل حجم الملفات لمقروءة
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024, sizes = ['Bytes', 'KB', 'MB', 'GB'], i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
 
     async function checkPin() {
         const pin = document.getElementById('pinInput').value;
-        const btn = document.getElementById('loginBtn');
-        btn.innerHTML = "جاري التحقق...";
-        
-        try {
-            const response = await fetch(webAppUrl, {
-                method: 'POST',
-                body: JSON.stringify({ pin: pin, action: 'loadFiles' })
-            });
-            const result = await response.json();
-
-            if (result.result === "success") {
-                sessionPin = pin;
-                document.getElementById('lockScreen').style.display = "none";
-                document.getElementById('mainContent').style.display = "block";
-                renderFiles(result.files);
-            } else {
-                document.getElementById('errorMsg').style.display = "block";
-            }
-        } catch (e) { alert("خطأ في الاتصال بالسحابة"); }
-        btn.innerHTML = "دخول";
+        const response = await fetch(webAppUrl, { method: 'POST', body: JSON.stringify({ pin: pin, action: 'loadFiles' }) });
+        const res = await response.json();
+        if (res.result === "success") {
+            sessionPin = pin;
+            document.getElementById('lockScreen').style.display = "none";
+            document.getElementById('mainContent').style.display = "block";
+            currentFiles = res.files;
+            renderFiles();
+        } else { alert("الرمز خطأ!"); }
     }
 
     async function uploadFiles() {
-        const fileInput = document.getElementById('fileInput');
-        const status = document.getElementById('status');
-        const files = fileInput.files;
-        if (files.length === 0) return;
-
-        status.innerHTML = "جاري الرفع... ⏳";
+        const files = document.getElementById('fileInput').files;
         for (let file of files) {
             const reader = new FileReader();
             await new Promise(r => {
                 reader.readAsDataURL(file);
                 reader.onload = async () => {
-                    await fetch(webAppUrl, { 
-                        method: 'POST', 
-                        body: JSON.stringify({ pin: sessionPin, action: 'uploadFile', base64: reader.result.split(',')[1], type: file.type, name: file.name }) 
-                    });
+                    await fetch(webAppUrl, { method: 'POST', body: JSON.stringify({ pin: sessionPin, action: 'uploadFile', base64: reader.result.split(',')[1], type: file.type, name: file.name }) });
                     r();
                 };
             });
         }
-        status.innerHTML = "✅ تم الرفع!";
-        fileInput.value = "";
         refresh();
     }
 
     async function uploadText() {
         const text = document.getElementById('textSnippet').value;
-        if (!text.trim()) return;
-        await fetch(webAppUrl, { 
-            method: 'POST', 
-            body: JSON.stringify({ pin: sessionPin, action: 'uploadText', text: text }) 
-        });
+        await fetch(webAppUrl, { method: 'POST', body: JSON.stringify({ pin: sessionPin, action: 'uploadText', text: text }) });
         document.getElementById('textSnippet').value = "";
         refresh();
     }
 
-    async function refresh() {
-        const response = await fetch(webAppUrl, {
-            method: 'POST',
-            body: JSON.stringify({ pin: sessionPin, action: 'loadFiles' })
-        });
-        const result = await response.json();
-        renderFiles(result.files);
+    async function deleteFile(id) {
+        if (!confirm("هل أنت متأكد من حذف هذا الملف؟")) return;
+        await fetch(webAppUrl, { method: 'POST', body: JSON.stringify({ pin: sessionPin, action: 'deleteFile', id: id }) });
+        refresh();
     }
 
-    function renderFiles(files) {
+    // نافذة قراءة النصوص
+    async function previewText(id, title) {
+        document.getElementById('textModal').style.display = 'flex';
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalText').value = "جاري جلب النص من السحابة... ⏳";
+        try {
+            const response = await fetch(webAppUrl, { method: 'POST', body: JSON.stringify({ pin: sessionPin, action: 'readFile', id: id }) });
+            const res = await response.json();
+            document.getElementById('modalText').value = res.result === 'success' ? res.text : "❌ تعذر قراءة الملف.";
+        } catch(e) { document.getElementById('modalText').value = "❌ خطأ في الاتصال."; }
+    }
+
+    function closeModal() {
+        document.getElementById('textModal').style.display = 'none';
+        document.getElementById('modalText').value = '';
+    }
+
+    async function refresh() {
+        document.getElementById('fileDisplay').innerHTML = "جاري التحديث... ⏳";
+        const response = await fetch(webAppUrl, { method: 'POST', body: JSON.stringify({ pin: sessionPin, action: 'loadFiles' }) });
+        const res = await response.json();
+        currentFiles = res.files;
+        renderFiles();
+    }
+
+    function renderFiles() {
         const display = document.getElementById('fileDisplay');
-        display.innerHTML = files.map(f => {
-            const isImg = f.mimeType.includes('image');
-            const thumb = `https://drive.google.com/thumbnail?id=${f.id}&sz=w600`;
+        if (!currentFiles || currentFiles.length === 0) { display.innerHTML = "<p style='text-align:center;'>لا توجد ملفات.</p>"; return; }
+
+        // تطبيق الفلترة (الفرز)
+        const sortType = document.getElementById('sortSelect').value;
+        let sorted = [...currentFiles];
+        if (sortType === 'newest') sorted.sort((a, b) => b.timeRaw - a.timeRaw);
+        if (sortType === 'oldest') sorted.sort((a, b) => a.timeRaw - b.timeRaw);
+        if (sortType === 'largest') sorted.sort((a, b) => b.size - a.size);
+        if (sortType === 'smallest') sorted.sort((a, b) => a.size - b.size);
+
+        display.innerHTML = sorted.map(f => {
+            const isText = f.name.includes('.txt');
+            const isImg = f.mimeType && f.mimeType.includes('image');
+            
+            // تخصيص زر "عرض" أو "قراءة" بناءً على نوع الملف
+            const viewButton = isText 
+                ? `<button class="btn-link" style="background:#fbbc05; color:#333; border:none;" onclick="previewText('${f.id}', '${f.name}')">قراءة 📖</button>`
+                : `<a href="${f.url}" target="_blank" class="btn-link" style="background:#e8f0fe; color:#1a73e8;">عرض 👁️</a>`;
+
             return `
             <div class="file-item">
-                ${isImg ? `<img src="${thumb}" class="preview-img">` : ''}
-                <div style="font-weight:bold;">${f.name}</div>
-                <div style="font-size:12px; color:#888;">${f.time}</div>
-                <div class="file-actions">
-                    <a href="${f.url}" target="_blank" class="btn-link view-link">عرض</a>
-                    <a href="https://drive.google.com/uc?export=download&id=${f.id}" class="btn-link download-link">تنزيل</a>
+                <div style="flex-grow: 1;">
+                    <div style="font-weight:bold; color:#333;">${isImg ? '🖼️' : (isText ? '📝' : '📄')} ${f.name}</div>
+                    <div style="font-size:12px; color:#888; margin-top:4px;">
+                        ⏰ ${f.time} | 📦 ${formatBytes(f.size)}
+                    </div>
                 </div>
-            </div>`;
+                <div style="display: flex; gap: 5px; flex-direction: column;">
+                    ${viewButton}
+                    <button class="delete-btn" onclick="deleteFile('${f.id}')">حذف 🗑️</button>
+                </div>
+            </div>
+            `;
         }).join('');
     }
 </script>
