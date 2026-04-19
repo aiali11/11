@@ -10,14 +10,18 @@
         .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; margin-bottom: 20px; text-align: center; }
         .upload-btn { background: #34a853; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
         .delete-btn { background: #ea4335; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
-        .file-item { background: white; padding: 15px; margin: 10px 0; border-radius: 10px; border-right: 5px solid #1a73e8; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: right;}
+        
+        /* تعديل تصميم الكرت ليتناسب مع الصورة المصغرة */
+        .file-item { background: white; padding: 15px; margin: 10px 0; border-radius: 10px; border-right: 5px solid #1a73e8; display: flex; flex-direction: column; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: right; }
+        .preview-img { width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px; margin-bottom: 12px; border: 1px solid #eee; background: #fafafa; }
+        .file-details-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        
         textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; resize: none; box-sizing: border-box; }
         select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; margin-bottom: 15px; }
         
-        /* تصميم نافذة قراءة النصوص */
         #textModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 500px; text-align: center; }
-        .btn-link { text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-link { text-decoration: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; }
     </style>
 </head>
 <body>
@@ -39,7 +43,6 @@
 </div>
 
 <div id="mainContent" style="display:none; width:100%; max-width:500px;">
-    
     <div class="card">
         <h3>رفع الملفات</h3>
         <input type="file" id="fileInput" multiple>
@@ -64,11 +67,10 @@
 </div>
 
 <script>
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbzfPhVbquV2PXRq5wNquIFDNjfRwCKU7P3lS_V6XQw8lKVkwzpxt3YC-yHOQFxKWCGMkw/exec"; // <<< رابطك هنا
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbzfPhVbquV2PXRq5wNquIFDNjfRwCKU7P3lS_V6XQw8lKVkwzpxt3YC-yHOQFxKWCGMkw/exec"; // <<< تذكر تحط رابطك هنا
     let sessionPin = "";
-    let currentFiles = []; // مصفوفة لتخزين الملفات للفلترة
+    let currentFiles = [];
 
-    // دالة تحويل حجم الملفات لمقروءة
     function formatBytes(bytes) {
         if (bytes === 0) return '0 Bytes';
         const k = 1024, sizes = ['Bytes', 'KB', 'MB', 'GB'], i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -116,7 +118,6 @@
         refresh();
     }
 
-    // نافذة قراءة النصوص
     async function previewText(id, title) {
         document.getElementById('textModal').style.display = 'flex';
         document.getElementById('modalTitle').innerText = title;
@@ -145,7 +146,6 @@
         const display = document.getElementById('fileDisplay');
         if (!currentFiles || currentFiles.length === 0) { display.innerHTML = "<p style='text-align:center;'>لا توجد ملفات.</p>"; return; }
 
-        // تطبيق الفلترة (الفرز)
         const sortType = document.getElementById('sortSelect').value;
         let sorted = [...currentFiles];
         if (sortType === 'newest') sorted.sort((a, b) => b.timeRaw - a.timeRaw);
@@ -156,23 +156,29 @@
         display.innerHTML = sorted.map(f => {
             const isText = f.name.includes('.txt');
             const isImg = f.mimeType && f.mimeType.includes('image');
+            const thumb = `https://drive.google.com/thumbnail?id=${f.id}&sz=w600`;
             
-            // تخصيص زر "عرض" أو "قراءة" بناءً على نوع الملف
+            // إضافة الصورة المعاينة إذا كان الملف صورة
+            const imgHtml = isImg ? `<img src="${thumb}" class="preview-img">` : '';
+            
             const viewButton = isText 
                 ? `<button class="btn-link" style="background:#fbbc05; color:#333; border:none;" onclick="previewText('${f.id}', '${f.name}')">قراءة 📖</button>`
                 : `<a href="${f.url}" target="_blank" class="btn-link" style="background:#e8f0fe; color:#1a73e8;">عرض 👁️</a>`;
 
             return `
             <div class="file-item">
-                <div style="flex-grow: 1;">
-                    <div style="font-weight:bold; color:#333;">${isImg ? '🖼️' : (isText ? '📝' : '📄')} ${f.name}</div>
-                    <div style="font-size:12px; color:#888; margin-top:4px;">
-                        ⏰ ${f.time} | 📦 ${formatBytes(f.size)}
+                ${imgHtml}
+                <div class="file-details-row">
+                    <div style="flex-grow: 1;">
+                        <div style="font-weight:bold; color:#333;">${isImg ? '🖼️' : (isText ? '📝' : '📄')} ${f.name}</div>
+                        <div style="font-size:12px; color:#888; margin-top:4px;">
+                            ⏰ ${f.time} | 📦 ${formatBytes(f.size)}
+                        </div>
                     </div>
-                </div>
-                <div style="display: flex; gap: 5px; flex-direction: column;">
-                    ${viewButton}
-                    <button class="delete-btn" onclick="deleteFile('${f.id}')">حذف 🗑️</button>
+                    <div style="display: flex; gap: 5px; flex-direction: column;">
+                        ${viewButton}
+                        <button class="delete-btn" onclick="deleteFile('${f.id}')">حذف 🗑️</button>
+                    </div>
                 </div>
             </div>
             `;
